@@ -9,30 +9,26 @@ public class MultiServer {
 	
 	private static ServerSocket serverSocket = null;
 	private static Socket clientSocket = null;
+	private int portNumber = 7777;	//default port number
 	
-	private static int maxClientsCount = 2;
+	private static int maxClientsCount = 3;
 	
 	//array with threads of each client
 	private static ClientThread[] threads = new ClientThread[maxClientsCount];
 	
 	public MultiServer(){
-		
+		//open server socket on portNumber 
+				try{
+					serverSocket = new ServerSocket(portNumber);
+				}catch(IOException e){
+					System.out.println(e);
+				}
 	}
 	public static void main(String[] args){
 		MultiServer turnOn = new MultiServer();
-		turnOn.run();
+		turnOn.connect();
 	}
-	public void run(){
-		
-		//default port number
-		int portNumber = 3333;
-		
-		//open server socket on portNumber 
-		try{
-			serverSocket = new ServerSocket(portNumber);
-		}catch(IOException e){
-			System.out.println(e);
-		}
+	public void connect(){
 		
 		//create a client socket for each connection and pass it to a new clinet thread
 		while (true){
@@ -61,7 +57,7 @@ public class MultiServer {
 }
 
 //class for client's thread
-class ClientThread extends Thread{
+class ClientThread extends Thread implements Runnable{
 	
 	private Socket clientSocket = null;
 	private ClientThread[] threads;

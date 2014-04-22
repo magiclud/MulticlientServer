@@ -17,7 +17,7 @@ public class MultiClient implements Runnable {
 	
 	public static void mian(String[] args){
 		//default port 
-		int portNumber = 3333;
+		int portNumber = 7777;
 		//default host 
 		String host = "localhost";
 		
