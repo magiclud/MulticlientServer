@@ -18,8 +18,11 @@ public class MultiServer {
 	public MultiServer(){
 		
 	}
-	
-	public void turnOn(){
+	public static void main(String[] args){
+		MultiServer turnOn = new MultiServer();
+		turnOn.run();
+	}
+	public void run(){
 		
 		//default port number
 		int portNumber = 3333;
