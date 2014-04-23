@@ -4,79 +4,98 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
-
+import java.net.UnknownHostException;
 
 public class MultiClient implements Runnable {
 
+	// The client socket
 	private static Socket clientSocket = null;
-	private static PrintStream os = null;	//outout stream
-	private static DataInputStream is = null; //input stream
-	
-	private static BufferedReader inputLine = null; 
+	// The output stream
+	private static PrintStream os = null;
+	// The input stream
+	public static DataInputStream is = null;
+
+	private static BufferedReader inputLine = null;
 	private static boolean closed = false;
-	
-	public static void mian(String[] args){
-		//default port 
-		int portNumber = 7777;
-		//default host 
-		String host = "localhost";
+
+	public static void main(String[] args) {
 		
-		if(args.length < 2){
-			System.out.println("Usage: host: "+ host+ ", portNumber="+ portNumber);
+		
+		// The default port.
+		int portNumber = 3333;
+		// The default host.
+		String host = "localhost";
+
+
+		if (args.length < 2) {
+			System.out
+						.println("Usage: java MultiThreadChatClient <host> <portNumber>\n"
+								+ "Now using host=" + host + ", portNumber=" + portNumber);
 		}
-		else{
+		else {
 			host = args[0];
 			portNumber = Integer.valueOf(args[1]).intValue();
 		}
-		
-		//open a socket on a given host and port, open input and output streams
-		try{
+
+		/* Open a socket on a given host and port. Open input and output streams. */
+		try {
 			clientSocket = new Socket(host, portNumber);
 			inputLine = new BufferedReader(new InputStreamReader(System.in));
 			os = new PrintStream(clientSocket.getOutputStream());
 			is = new DataInputStream(clientSocket.getInputStream());
-		////}catch(UnknowHostException e){
-		//	System.err.println("Don't know about host "+ host);
-		}catch(IOException e){
-			System.err.println("Couldn't get I/O for the connection to the host " + host);
 		}
-		//open a connection to on the portNumber and write some data
-		if(clientSocket != null && os != null && is != null){
+		catch (UnknownHostException e) {
+			System.err.println("Don't know about host " + host);
+		}
+		catch (IOException e) {
+			System.err.println("Couldn't get I/O for the connection to the host "
+					+ host);
+		}
+
+		/* If everything has been initialized then we want to write some data to the
+		 * socket we have opened a connection to on the port portNumber. */
+		if (clientSocket != null && os != null && is != null) {
 			try {
-				//create thread to read wrom the server
+
+				/* Create a thread to read from the server. */
 				new Thread(new MultiClient()).start();
-				while(!closed){
+				while (!closed) {
 					os.println(inputLine.readLine().trim());
 				}
-				//close the outputStream, close the input stream, close the socket
+				/* Close the output stream, close the input stream, close the socket. */
 				os.close();
 				is.close();
 				clientSocket.close();
-			}catch(IOException e){
-				System.err.println("IOException: " + e);
+			}
+			catch (IOException e) {
+				System.err.println("IOException:  " + e);
 			}
 		}
 	}
-	//create a thread to read from the server
+
+	/* Create a thread to read from the server. (non-Javadoc)
+	 * 
+	 * @see java.lang.Runnable#run() */
 	@Override
 	public void run() {
-		
-		String responseLne;
-		try{
-			while((responseLne = is.readLine()) != null){
-				System.out.println(responseLne);
-				if(responseLne.indexOf("*** Cliet leave the connection") != -1){
+		/* Keep on reading from the socket till we receive "Bye" from the
+		 * server. Once we received that then we want to break. */
+		String responseLine;
+		try {
+			while ((responseLine = is.readLine()) != null) {
+				System.out.println(responseLine);
+				if (responseLine.indexOf("*** Bye") != -1)
 					break;
-				}
-				if(responseLne.startsWith("from")){
+				if(responseLine.startsWith("from")) {
 					System.out.println("dziala");
 				}
+				
+				
 			}
 			closed = true;
 		}
-catch(IOException e){
-	System.err.println("IOException: " + e);
-}		
+		catch (IOException e) {
+			System.err.println("IOException:  " + e);
+		}
 	}
-
 }
